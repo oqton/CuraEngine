@@ -884,14 +884,10 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage, const S
 
     // OpenMP compatibility fix for GCC <= 8 and GCC >= 9
     // See https://www.gnu.org/software/gcc/gcc-9/porting_to.html, section "OpenMP data sharing"
-#if defined(__GNUC__) && __GNUC__ <= 8
-    #pragma omp parallel for default(none) shared(xy_disallowed_per_layer, sloped_areas_per_layer, storage, mesh) schedule(dynamic)
-#else
     #pragma omp parallel for default(none) \
         shared(xy_disallowed_per_layer, sloped_areas_per_layer, storage, mesh, layer_count, is_support_mesh_place_holder,  \
                use_xy_distance_overhang, z_distance_top, tan_angle, xy_distance, xy_distance_overhang, layer_thickness, support_line_width, sloped_area_detection_width) \
         schedule(dynamic)
-#endif // defined(__GNUC__) && __GNUC__ <= 8
 
     // for all other layers (of non support meshes) compute the overhang area and possibly use that when calculating the support disallowed area
     // Use a signed type for the loop counter so MSVC compiles (because it uses OpenMP 2.0, an old version).
@@ -1009,11 +1005,7 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage, const S
 
         // OpenMP compatibility fix for GCC <= 8 and GCC >= 9
         // See https://www.gnu.org/software/gcc/gcc-9/porting_to.html, section "OpenMP data sharing"
-#if defined(__GNUC__) && __GNUC__ <= 8
-#pragma omp parallel for default(none) shared(sloped_areas_per_layer) schedule(dynamic)
-#else
 #pragma omp parallel for default(none) shared(sloped_areas_per_layer, layer_count, bottom_stair_step_layer_count) schedule(dynamic)
-#endif // defined(__GNUC__) && __GNUC__ <= 8
         for (int base_layer_idx = 1; base_layer_idx < static_cast<int>(layer_count); base_layer_idx += bottom_stair_step_layer_count)
         {
             // Add the sloped areas together for each stair of the stair stepping.
@@ -1169,11 +1161,7 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage, const S
 
     // OpenMP compatibility fix for GCC <= 8 and GCC >= 9
     // See https://www.gnu.org/software/gcc/gcc-9/porting_to.html, section "OpenMP data sharing"
-#if defined(__GNUC__) && __GNUC__ <= 8
-    #pragma omp parallel for default(none) shared(support_areas, storage) schedule(dynamic)
-#else
     #pragma omp parallel for default(none) shared(support_areas, storage, max_checking_layer_idx, layer_z_distance_top) schedule(dynamic)
-#endif // defined(__GNUC__) && __GNUC__ <= 8
 
         // Use a signed type for the loop counter so MSVC compiles (because it uses OpenMP 2.0, an old version).
         for (int layer_idx = 0; layer_idx < max_checking_layer_idx; layer_idx++)
